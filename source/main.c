@@ -363,8 +363,10 @@ int main(int argc, char **argv)
 		u32			kDown;
 		u32			kHeld;
 		u32         kUp;
-		u8			volInput;
+        u8 volInput;
 		static u64	mill = 0;
+        static u8 previousVolume = 1;
+        static bool volumePaused = false;
 
 		gfxFlushBuffers();
 		gspWaitForVBlank();
@@ -374,8 +376,8 @@ int main(int argc, char **argv)
 		kDown = hidKeysDown();
 		kHeld = hidKeysHeld();
 		kUp = hidKeysUp();
-		volInput = HIDUSER_GetSoundVolume();
-		
+		HIDUSER_GetSoundVolume(&volInput);
+
 		consoleSelect(&bottomScreen);
 
 		/* Exit ctrmus */
@@ -392,16 +394,25 @@ int main(int argc, char **argv)
 			mill = osGetTime();
 		
 		/* Slider pause */
-		if (volInput == 0)
-			{
-				if(isPlaying() == false)
-					continue;
+		if (volInput == 0 && previousVolume != 0)
+{
+    if (isPlaying())
+    {
+        togglePlayback();
+        volumePaused = true;
+    }
+}
+else if (volInput != 0 && previousVolume == 0)
+{
+    if (volumePaused && !isPlaying())
+    {
+        togglePlayback();
+        volumePaused = false;
+    }
+}
 
-				consoleSelect(&topScreenLog);
-				if(togglePlayback() == true)
-					puts("Paused");
-				else
-					puts("Playing");
+previousVolume = volInput;
+
 
 
 		if(kHeld & KEY_L)
