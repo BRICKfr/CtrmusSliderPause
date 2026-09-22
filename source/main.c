@@ -363,6 +363,7 @@ int main(int argc, char **argv)
 		u32			kDown;
 		u32			kHeld;
 		u32         kUp;
+		u8			volInput;
 		static u64	mill = 0;
 
 		gfxFlushBuffers();
@@ -373,7 +374,8 @@ int main(int argc, char **argv)
 		kDown = hidKeysDown();
 		kHeld = hidKeysHeld();
 		kUp = hidKeysUp();
-
+		volInput = HIDUSER_GetSoundVolume();
+		
 		consoleSelect(&bottomScreen);
 
 		/* Exit ctrmus */
@@ -385,8 +387,22 @@ int main(int argc, char **argv)
 		printf("\rNum: %d, Max: %d, from: %d   ", fileNum, fileMax, from);
 		consoleSelect(&bottomScreen);
 #endif
+		
 		if(kDown)
 			mill = osGetTime();
+		
+		/* Slider pause */
+		if (volInput == 0)
+			{
+				if(isPlaying() == false)
+					continue;
+
+				consoleSelect(&topScreenLog);
+				if(togglePlayback() == true)
+					puts("Paused");
+				else
+					puts("Playing");
+
 
 		if(kHeld & KEY_L)
 		{
